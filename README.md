@@ -1,1 +1,2 @@
-# crowd-density-estimation
+# Crowd Density Estimation
+Thomas Nadin-Hepburn
