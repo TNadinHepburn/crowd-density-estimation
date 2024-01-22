@@ -48,10 +48,10 @@ def trainImgH5(trainortest):
         
         try:
             Reading_Image = cv2.cvtColor(cv2.imread(x_images),cv2.COLOR_BGR2RGB)
-            Resized_Image = cv2.resize(Reading_Image,(360,360))
+            Resized_Image = cv2.resize(Reading_Image,(180,180))
             with h5py.File(x_h5,'r') as f:
                 data = f['density'][()]
-            Resized_Gaussian_Image = cv2.resize(data,(360,360), interpolation=cv2.INTER_CUBIC)
+            Resized_Gaussian_Image = cv2.resize(data,(180,180), interpolation=cv2.INTER_CUBIC)
             
             imgLabelList.append(Resized_Image)
             h5LabelList.append(Resized_Gaussian_Image)
