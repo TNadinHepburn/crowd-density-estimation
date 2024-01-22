@@ -1,35 +1,12 @@
 # File for functions of CNN
 import tensorflow as tf
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.callbacks import LearningRateScheduler, EarlyStopping, ModelCheckpoint
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, BatchNormalization, ReLU, Conv2DTranspose
 from keras.optimizers import Adam
 import matplotlib.pyplot as plt, numpy as np
 from sklearn.model_selection import train_test_split
 from dataset import trainImgH5
-
-model = Sequential()
-model.add(Conv2D(64, (3, 3), activation='relu', padding='same', input_shape=(180, 180, 3)))
-model.add(Conv2D(64, (3, 3), activation='relu', padding='same'))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-
-model.add(Conv2D(128, (2, 2), activation='relu', padding='same'))
-model.add(Conv2D(128, (2, 2), activation='relu', padding='same'))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-
-model.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
-model.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
-model.add(Conv2D(256, (3, 3), activation='relu', padding='same'))
-model.add(MaxPooling2D(pool_size=(2, 2), strides=(2, 2)))
-
-# Flatten and fully connected layers
-model.add(Flatten())
-model.add(Dense(128, activation='relu'))
-model.add(Dense(180, activation='softmax'))  
-
-# Compile the model
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['mae'])
-model.summary()
 
 lr_monitor = LearningRateScheduler(lambda epochs : 1e-8 * 10 ** (epochs/20))
 img, labels = trainImgH5(trainortest='combined')
@@ -40,7 +17,7 @@ x_train, x_test, y_train, y_test = train_test_split(img, labels, test_size=0.2)
 x_train, x_val, y_train, y_val = train_test_split(x_train,y_train, test_size=0.1)
 x_train, x_test = x_train / 255.0, x_test / 255.0
 
-####### copied from kaggle ######
+####### from kaggle ######
 figure,axis = plt.subplots(1,2,figsize=(10,10))
 
 axis[0].imshow(y_train[1],cmap="jet")
@@ -51,13 +28,21 @@ axis[1].set_xlabel(x_train[1].shape)
 axis[1].set_title("ORIGINAL")
 plt.show()
 
-Early_Stopper = EarlyStopping(monitor="loss",patience=3,mode="min")
-Checkpoint_Model = ModelCheckpoint(monitor="val_accuracy",
-                                                      save_best_only=True,
-                                                      save_weights_only=True,
-                                                      filepath="./modelcheck")
-compile_loss = "mse"
-compile_optimizer = Adam(lr=0.0000001)
+modelPath = "./modelcheck.h5"
+
+Early_Stopper = EarlyStopping(monitor="val_loss",
+                              patience=10,
+                              mode="min",
+                              restore_best_weights=True)
+
+Checkpoint_Model = ModelCheckpoint(monitor="val_loss",
+                                   save_best_only=True,
+                                   save_weights_only=True,
+                                   mode="min",
+                                   filepath=modelPath)
+
+compile_loss = "mean_squared_error"
+compile_optimizer = Adam(lr=0.00001)
 output_class = 1
 
 Encoder_AE = Sequential()
@@ -91,15 +76,62 @@ Decoder_AE.add(Conv2DTranspose(output_class,(2,2)))
 Decoder_AE.add(ReLU())
 
 Auto_Encoder = Sequential([Encoder_AE,Decoder_AE])
+
 Auto_Encoder.compile(loss=compile_loss,optimizer=compile_optimizer)
 
-Model_AutoEncoder_History = Auto_Encoder.fit(x_train, y_train,epochs=3,validation_data=(x_val,y_val),callbacks=[Early_Stopper,Checkpoint_Model])
+Auto_Encoder.fit(x_train, y_train,epochs=30,validation_data=(x_val,y_val),callbacks=[Early_Stopper,Checkpoint_Model])
 
-Prediction_Seen = Auto_Encoder.predict(x_test[:5])
+
+
+Prediction_Seen = Auto_Encoder.predict(x_train[:5])
+figure,axis = plt.subplots(1,3,figsize=(10,10))
+axis[0].imshow(x_train[0])
+axis[0].set_title("ORIGINAL")
+axis[1].imshow(Prediction_Seen[0],cmap="jet")
+axis[1].set_title("PREDICTION")
+axis[2].imshow(y_train[0],cmap="jet")
+axis[2].set_title("TRUE")
+plt.show()
+figure,axis = plt.subplots(1,3,figsize=(10,10))
+axis[0].imshow(x_train[1])
+axis[0].set_title("ORIGINAL")
+axis[1].imshow(Prediction_Seen[1],cmap="jet")
+axis[1].set_title("PREDICTION")
+axis[2].imshow(y_train[1],cmap="jet")
+axis[2].set_title("TRUE")
+plt.show()
+figure,axis = plt.subplots(1,3,figsize=(10,10))
+axis[0].imshow(x_train[2])
+axis[0].set_title("ORIGINAL")
+axis[1].imshow(Prediction_Seen[2],cmap="jet")
+axis[1].set_title("PREDICTION")
+axis[2].imshow(y_train[2],cmap="jet")
+axis[2].set_title("TRUE")
+plt.show()
+figure,axis = plt.subplots(1,3,figsize=(10,10))
+axis[0].imshow(x_train[3])
+axis[0].set_title("ORIGINAL")
+axis[1].imshow(Prediction_Seen[3],cmap="jet")
+axis[1].set_title("PREDICTION")
+axis[2].imshow(y_train[3],cmap="jet")
+axis[2].set_title("TRUE")
+plt.show()
+figure,axis = plt.subplots(1,3,figsize=(10,10))
+axis[0].imshow(x_train[4])
+axis[0].set_title("ORIGINAL")
+axis[1].imshow(Prediction_Seen[4],cmap="jet")
+axis[1].set_title("PREDICTION")
+axis[2].imshow(y_train[4],cmap="jet")
+axis[2].set_title("TRUE")
+plt.show()
+
+
+
+Prediction_Unseen = Auto_Encoder.predict(x_test[:5])
 figure,axis = plt.subplots(1,3,figsize=(10,10))
 axis[0].imshow(x_test[0])
 axis[0].set_title("ORIGINAL")
-axis[1].imshow(Prediction_Seen[0],cmap="jet")
+axis[1].imshow(Prediction_Unseen[0],cmap="jet")
 axis[1].set_title("PREDICTION")
 axis[2].imshow(y_test[0],cmap="jet")
 axis[2].set_title("TRUE")
@@ -107,7 +139,7 @@ plt.show()
 figure,axis = plt.subplots(1,3,figsize=(10,10))
 axis[0].imshow(x_test[1])
 axis[0].set_title("ORIGINAL")
-axis[1].imshow(Prediction_Seen[1],cmap="jet")
+axis[1].imshow(Prediction_Unseen[1],cmap="jet")
 axis[1].set_title("PREDICTION")
 axis[2].imshow(y_test[1],cmap="jet")
 axis[2].set_title("TRUE")
@@ -115,7 +147,7 @@ plt.show()
 figure,axis = plt.subplots(1,3,figsize=(10,10))
 axis[0].imshow(x_test[2])
 axis[0].set_title("ORIGINAL")
-axis[1].imshow(Prediction_Seen[2],cmap="jet")
+axis[1].imshow(Prediction_Unseen[2],cmap="jet")
 axis[1].set_title("PREDICTION")
 axis[2].imshow(y_test[2],cmap="jet")
 axis[2].set_title("TRUE")
@@ -123,7 +155,7 @@ plt.show()
 figure,axis = plt.subplots(1,3,figsize=(10,10))
 axis[0].imshow(x_test[3])
 axis[0].set_title("ORIGINAL")
-axis[1].imshow(Prediction_Seen[3],cmap="jet")
+axis[1].imshow(Prediction_Unseen[3],cmap="jet")
 axis[1].set_title("PREDICTION")
 axis[2].imshow(y_test[3],cmap="jet")
 axis[2].set_title("TRUE")
@@ -131,16 +163,16 @@ plt.show()
 figure,axis = plt.subplots(1,3,figsize=(10,10))
 axis[0].imshow(x_test[4])
 axis[0].set_title("ORIGINAL")
-axis[1].imshow(Prediction_Seen[4],cmap="jet")
+axis[1].imshow(Prediction_Unseen[4],cmap="jet")
 axis[1].set_title("PREDICTION")
 axis[2].imshow(y_test[4],cmap="jet")
 axis[2].set_title("TRUE")
 plt.show()
-print(np.count_nonzero(Prediction_Seen[0]))
-print(np.count_nonzero(Prediction_Seen[1]))
-print(np.count_nonzero(Prediction_Seen[2]))
-print(np.count_nonzero(Prediction_Seen[3]))
-print(np.count_nonzero(Prediction_Seen[4]))
+print(np.count_nonzero(Prediction_Unseen[0]))
+print(np.count_nonzero(Prediction_Unseen[1]))
+print(np.count_nonzero(Prediction_Unseen[2]))
+print(np.count_nonzero(Prediction_Unseen[3]))
+print(np.count_nonzero(Prediction_Unseen[4]))
 
 
 ############
