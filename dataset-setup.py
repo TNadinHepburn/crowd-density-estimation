@@ -7,13 +7,9 @@ def DownloadKaggleDataset():
     # Initialize Kaggle API
     api = KaggleApi()
     api.authenticate()
-
-
     dataset_name = 'tthien/shanghaitech-with-people-density-map'
     api.dataset_download_files(dataset_name, path='./shanghaitech_data', unzip=True)
-
     # setup code from https://www.kaggle.com/code/donkeys/kaggle-python-api
-
 
 def CombineDatasetParts():
     # Combine Part A & B
@@ -21,7 +17,6 @@ def CombineDatasetParts():
 
     if not os.path.exists(combinedDir):
         os.makedirs(combinedDir)
-
         for folder in ['ground-truth','ground-truth-h5','images']:
             counter = 0
             for split in ['train_data','test_data']:
@@ -87,6 +82,6 @@ def ResplitDataset():
         shutil.copy2(source_file_mat, destination_path_mat)
         shutil.copy2(source_file_h5, destination_path_h5)
 
-# DownloadKaggleDataset()
-# CombineDatasetParts()
-# ResplitDataset()
+DownloadKaggleDataset()
+CombineDatasetParts()
+ResplitDataset()
