@@ -1,8 +1,13 @@
-
 import torch
 import torch.nn as nn
+import torch.optim as optim
 import torch.nn.functional as F
-
+from torch.utils.data import Dataset, DataLoader
+from pathlib import Path
+from sklearn.model_selection import train_test_split
+from dataset import getImgH5, CustomDataset
+from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 class DoubleConv(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
@@ -23,7 +28,6 @@ class DoubleConv(nn.Module):
     def forward(self, x):
         return self.double_conv(x)
 
-
 class Down(nn.Module):
     """Downscaling with maxpool then double conv"""
 
@@ -36,7 +40,6 @@ class Down(nn.Module):
 
     def forward(self, x):
         return self.maxpool_conv(x)
-
 
 class Up(nn.Module):
     """Upscaling then double conv"""
@@ -65,7 +68,6 @@ class Up(nn.Module):
         # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
-
 
 class OutConv(nn.Module):
     def __init__(self, in_channels, out_channels):
@@ -118,3 +120,72 @@ class UNet(nn.Module):
         self.up3 = torch.utils.checkpoint(self.up3)
         self.up4 = torch.utils.checkpoint(self.up4)
         self.outc = torch.utils.checkpoint(self.outc)
+
+
+img, labels = getImgH5()
+img = img / 255.0
+print(type(img),type(img[0]),type(labels),type(labels[0]))
+print(img.shape,labels.shape)
+print(img[0].shape,labels[0].shape)
+
+plt.subplot(1, 2, 1)
+plt.imshow(img[0])
+plt.title('Image')
+plt.subplot(1, 2, 2)
+plt.imshow(labels[0], cmap='jet')
+plt.title('Label')
+plt.show()
+# x_train, x_test, y_train, y_test = train_test_split(img, labels, test_size=0.2)
+# x_train, x_val, y_train, y_val = train_test_split(x_train,y_train, test_size=0.1)
+# x_train, x_test, x_val = x_train / 255.0, x_test / 255.0, x_val / 255.0
+
+
+# # Create dataset and dataloaders
+# train_dataset = CustomDataset(x_train, y_train)
+# test_dataset = CustomDataset(x_test, y_test)
+# val_dataset = CustomDataset(x_val, y_val)
+
+# train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
+# test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
+# val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
+
+# n_train, n_val = len(x_train), len(x_val)
+
+
+# model = UNet(n_channels=3, n_classes=1, bilinear=True)
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# model.to(device=device)
+
+# epochs = 5
+# dir_checkpoint = Path('./checkpoints/')
+
+# criterion = nn.L1Loss()
+# optimizer = optim.Adam(model.parameters(), lr=1e-5, weight_decay=1e-8)
+
+# for epoch in range(1, epochs + 1):
+#     model.train()
+#     epoch_loss = 0
+#     with tqdm(total=n_train, desc=f'Epoch {epoch}/{epochs}', unit='img') as pbar:
+#         for inputs, targets in train_loader:
+#             inputs, targets = inputs.to(device), targets.to(device)
+#             outputs = model(inputs)
+#             loss = criterion(outputs, targets)
+#             optimizer.zero_grad()
+#             loss.backward()
+#             pbar.update(inputs.shape[0])
+#             epoch_loss += loss.item()
+#             pbar.set_postfix(**{'loss (batch)': loss.item()})
+        
+#         model.eval()
+#         num_val_batches = len(val_loader)
+#         mae_score = 0.0
+#         for inputs, targets in tqdm(val_loader, total=num_val_batches, desc='Validation round', unit='batch', leave=False):
+#             inputs, targets = inputs.to(device), targets.to(device)
+#             outputs = model(inputs)      
+#             mae_score += criterion(outputs, targets)     
+#         model.train() 
+#         val_score = mae_score / num_val_batches
+
+#     Path(dir_checkpoint).mkdir(parents=True, exist_ok=True)
+#     state_dict = model.state_dict()
+#     torch.save(state_dict, str(dir_checkpoint / 'checkpoint_epoch{}.pth'.format(epoch)))
