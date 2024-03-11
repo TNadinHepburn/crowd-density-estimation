@@ -41,6 +41,7 @@ def getImgH5():
 
     X_Train = np.array(imgLabelList,dtype="float32")
     Y_Train = np.array(h5LabelList,dtype="float32")
+    Y_Train = np.expand_dims(Y_Train, axis=-1)
 
     return X_Train, Y_Train
 
@@ -55,5 +56,5 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, index):
         x = torch.tensor(np.transpose(self.x_data[index],(2,0,1)), dtype=torch.float32)
-        y = torch.tensor(self.y_data[index], dtype=torch.float32)
+        y = torch.tensor(np.transpose(self.y_data[index],(2,0,1)), dtype=torch.float32)
         return x, y
