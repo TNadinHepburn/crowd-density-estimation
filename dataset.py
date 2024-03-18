@@ -41,6 +41,7 @@ def getImgH5():
 
     X_Train = np.array(imgLabelList,dtype="float32")
     Y_Train = np.array(h5LabelList,dtype="float32")
+    X_Train = X_Train / 255.0
     Y_Train = np.expand_dims(Y_Train, axis=-1)
 
     return X_Train, Y_Train
