@@ -1,7 +1,7 @@
 # Main file for crowd density estimation
 from evaluation import evaluate
 from CNNunet import UNet
-from CNNunettrain import train_model
+from CNNunettrain import train_model as train_CNN
 from TransUNet import TransUNet
 import torch
 from sklearn.model_selection import train_test_split
@@ -31,9 +31,9 @@ if __name__ == '__main__':
     test_dataset = CustomDataset(x_test, y_test)
     val_dataset = CustomDataset(x_val, y_val)
 
-    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
-    val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.modeltype == 'CNN':
@@ -49,9 +49,10 @@ if __name__ == '__main__':
             print(mae_result)
 
         elif not args.evaluation:
-            train_model(model=model, epochs=10, train_dataset=train_loader, val_dataset=val_loader, device=device, n_train=len(x_train))
+            epochs = args.epochs if args.epochs else 10
+            model.to(device=device)
+            train_CNN(model=model, epochs=args.epoch, train_dataset=train_loader, val_dataset=val_loader, device=device, n_train=len(x_train))
 
-        
     elif args.modeltype == 'TRANS':
         model = TransUNet(device)
 
