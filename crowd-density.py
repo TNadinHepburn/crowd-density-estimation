@@ -1,7 +1,7 @@
 # Main file for crowd density estimation
 from evaluation import evaluate
 from CNNunet import UNet
-from CNNunettrain import train_model as train_CNN
+from CNNunetTrain import train_model as train_CNN
 from TransUNet import TransUNet
 import torch
 from sklearn.model_selection import train_test_split
@@ -17,7 +17,6 @@ def get_args():
     parser.add_argument('--load', '-f', type=str, default=False, help='Load model from a .pth file')
 
     return parser.parse_args()
-
 
 if __name__ == '__main__':
     args = get_args()
@@ -49,12 +48,12 @@ if __name__ == '__main__':
             print(mae_result)
 
         elif not args.evaluation:
-            epochs = args.epochs if args.epochs else 10
             model.to(device=device)
-            train_CNN(model=model, epochs=args.epoch, train_dataset=train_loader, val_dataset=val_loader, device=device, n_train=len(x_train))
+            train_CNN(model=model, epochs=args.epochs, train_dataset=train_loader, val_dataset=val_loader, device=device, n_train=len(x_train))
 
     elif args.modeltype == 'TRANS':
         model = TransUNet(device)
 
         if args.load:
+            model.to(device=device)
             model.load_model(args.load)
