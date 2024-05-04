@@ -20,7 +20,6 @@ def get_args():
 
     return parser.parse_args()
 
-
 if __name__ == '__main__':
     args = get_args()
 
@@ -33,9 +32,9 @@ if __name__ == '__main__':
     test_dataset = CustomDataset(x_test, y_test)
     val_dataset = CustomDataset(x_val, y_val)
 
-    train_loader = DataLoader(train_dataset, batch_size=16, shuffle=True)
-    test_loader = DataLoader(test_dataset, batch_size=16, shuffle=False)
-    val_loader = DataLoader(val_dataset, batch_size=16, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+    test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
+    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.modeltype == 'CNN':

@@ -82,6 +82,9 @@ def ResplitDataset():
         shutil.copy2(source_file_mat, destination_path_mat)
         shutil.copy2(source_file_h5, destination_path_h5)
 
+print('Downloading Kaggle Dataset')
 DownloadKaggleDataset()
+print('Combining Dataset Parts')
 CombineDatasetParts()
+print('Resplitting Dataset')
 ResplitDataset()
