@@ -1,7 +1,8 @@
 # Main file for crowd density estimation
 from evaluation import evaluate
 from CNNunet import UNet
-from CNNunettrain import train_model
+from ModelTraining import train_model
+from ModelPrediction import predict_img
 from TransUNet import TransUNet
 import torch
 from sklearn.model_selection import train_test_split
@@ -15,6 +16,7 @@ def get_args():
     parser.add_argument('--modeltype', '-t', metavar='T', type=str, default='CNN', help='Type of model to use. (CNN, TRANS)')
     parser.add_argument('--evaluation', '-v', metavar='EVAL', type=bool, default=False, help='Evaulate on loaded model')
     parser.add_argument('--load', '-f', type=str, default=False, help='Load model from a .pth file')
+    parser.add_argument('--predict', '-p', metavar='PRED', type=bool, default=False, help='Predict on test images')
 
     return parser.parse_args()
 
@@ -37,6 +39,7 @@ if __name__ == '__main__':
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.modeltype == 'CNN':
+        print("CNN")
         model = UNet(n_channels=3,n_classes=1,bilinear=True)
 
         if args.load:
@@ -45,15 +48,33 @@ if __name__ == '__main__':
             model.load_state_dict(state_dict)
 
         if args.evaluation:
-            mae_result = evaluate(model, val_data=val_loader)
-            print(mae_result)
+            result = evaluate(model, val_data=val_loader)
+            print(result)
+
+        if args.predict:
+            for img,_ in test_loader:
+                result = predict_img(model, img ,device)
 
         elif not args.evaluation:
-            train_model(model=model, epochs=10, train_dataset=train_loader, val_dataset=val_loader, device=device, n_train=len(x_train))
-
+            model.to(device=device)
+            results = train_model(model=model, epochs=args.epochs, train_dataset=train_loader, val_dataset=val_loader, device=device, n_train=len(x_train))
+            print(results)
         
     elif args.modeltype == 'TRANS':
-        model = TransUNet(device)
+        print("TRANS")
+        model = TransUNet(img_dim=224,
+                          in_channels=3,
+                          out_channels=128,
+                          head_num=4,
+                          mlp_dim=512,
+                          block_num=8,
+                          patch_dim=16,
+                          class_num=1)
+        print(sum(p.numel() for p in model.parameters()))
+        print(model(torch.randn(1, 3, 224, 224)).shape)
+        model.to(device=device)
+        results = train_model(model=model, epochs=args.epochs, train_dataset=train_loader, val_dataset=val_loader, device=device, n_train=len(x_train))
+        print(results)
 
-        if args.load:
-            model.load_model(args.load)
+        # if args.load:
+        #     model.load_model(args.load)

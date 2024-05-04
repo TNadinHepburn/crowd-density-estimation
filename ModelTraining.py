@@ -6,6 +6,7 @@ from pathlib import Path
 import datetime
 
 def train_model(model, epochs, train_dataset, val_dataset, device, n_train):
+    epoch_val_scores = []
 
     criterion = nn.L1Loss()
     optimizer = optim.Adam(model.parameters(), lr=1e-7, weight_decay=1e-8)
@@ -34,6 +35,7 @@ def train_model(model, epochs, train_dataset, val_dataset, device, n_train):
                     mae_score += criterion(outputs, targets)     
                 model.train() 
                 val_score = mae_score / num_val_batches
+                epoch_val_scores.append(val_score)
 
         dir_checkpoint = Path('./checkpoints/')
 
@@ -46,3 +48,4 @@ def train_model(model, epochs, train_dataset, val_dataset, device, n_train):
     new_model_path = '{}FINAL_EPOCH.pth'.format(datetime.datetime.now().strftime("%m%d%H%M"))
     torch.save(state_dict, str(dir_checkpoint / new_model_path))
     print('Model saved at {}'.format(new_model_path))
+    return epoch_val_scores

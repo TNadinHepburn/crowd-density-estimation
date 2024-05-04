@@ -23,12 +23,12 @@ class TransUNetSeg:
         self.optimizer = SGD(self.model.parameters(), lr=cfg.learning_rate,
                              momentum=cfg.momentum, weight_decay=cfg.weight_decay)
 
-    def load_model(self, path):
-        ckpt = torch.load(path)
-        self.model.load_state_dict(ckpt['model_state_dict'])
-        self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
+    # def load_model(self, path):
+    #     ckpt = torch.load(path)
+    #     self.model.load_state_dict(ckpt['model_state_dict'])
+    #     self.optimizer.load_state_dict(ckpt['optimizer_state_dict'])
 
-        self.model.eval()
+    #     self.model.eval()
 
     def train_step(self, **params):
         self.model.train()

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from dataset import getImgH5, CustomDataset
@@ -143,7 +143,7 @@ if __name__ == '__main__':
     model = UNet(n_channels=3, n_classes=1, bilinear=True)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.to(device=device)
-
+    scores_for_graph = []
     epochs = 100
     dir_checkpoint = Path('./checkpoints/')
 
@@ -155,6 +155,7 @@ if __name__ == '__main__':
         epoch_loss = 0
         with tqdm(total=n_train, desc=f'Epoch {epoch}/{epochs}', unit='img') as pbar:
             for inputs, targets in train_loader:
+                print(inputs.shape)
                 inputs, targets = inputs.to(device), targets.to(device)
                 outputs = model(inputs)
                 loss = criterion(outputs, targets)
@@ -174,10 +175,13 @@ if __name__ == '__main__':
                     mae_score += criterion(outputs, targets)     
                 model.train() 
                 val_score = mae_score / num_val_batches
+                scores_for_graph.append(val_score)
 
         Path(dir_checkpoint).mkdir(parents=True, exist_ok=True)
         state_dict = model.state_dict()
         torch.save(state_dict, str(dir_checkpoint / '{}checkpoint_epoch{}.pth'.format(datetime.datetime.now().strftime("%m%d%H%M"),epoch)))
+
+    print(scores_for_graph)
 
     model.eval()
     counter = 0
