@@ -1,6 +1,6 @@
 # Main file for crowd density estimation
-from evaluation import evaluate
-from CNNunet import UNet
+from ModelEvaluation import evaluate
+from UNet import UNet
 from ModelTraining import train_model
 from ModelPrediction import predict_img
 from TransUNet import TransUNet
@@ -17,15 +17,14 @@ def get_args():
     parser.add_argument('--evaluation', '-v', metavar='EVAL', type=bool, default=False, help='Evaulate on loaded model')
     parser.add_argument('--load', '-f', type=str, default=False, help='Load model from a .pth file')
     parser.add_argument('--predict', '-p', metavar='PRED', type=bool, default=False, help='Predict on test images')
-
     return parser.parse_args()
 
 if __name__ == '__main__':
     args = get_args()
 
     img, labels = getImgH5()
-    x_train, x_test, y_train, y_test = train_test_split(img, labels, test_size=0.2, random_state=1)
-    x_train, x_val, y_train, y_val = train_test_split(x_train,y_train, test_size=0.1, random_state=1)
+    x_train, x_test, y_train, y_test = train_test_split(img, labels, test_size=0.3, random_state=1)
+    x_train, x_val, y_train, y_val = train_test_split(x_test,y_test, test_size=(10/30), random_state=1)
 
     # Create dataset and dataloaders
     train_dataset = CustomDataset(x_train, y_train)
@@ -38,7 +37,6 @@ if __name__ == '__main__':
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.modeltype == 'CNN':
-        print("CNN")
         model = UNet(n_channels=3,n_classes=1,bilinear=True)
 
         if args.load:

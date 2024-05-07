@@ -147,7 +147,7 @@ if __name__ == '__main__':
     epochs = 100
     dir_checkpoint = Path('./checkpoints/')
 
-    criterion = nn.L1Loss()
+    criterion = nn.MSELoss()
     optimizer = optim.Adam(model.parameters(), lr=1e-7, weight_decay=1e-8)
 
     for epoch in range(1, epochs + 1):

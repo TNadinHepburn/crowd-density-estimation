@@ -30,21 +30,21 @@ def getImgH5():
             Resized_Image = cv2.resize(Reading_Image,(224,224))
             with h5py.File(x_h5,'r') as f:
                 data = f['density'][()]
-            Resized_Gaussian_Image = cv2.resize(data,(224,224))
+            Resized_GT_Image = cv2.resize(data,(224,224))
             
             imgLabelList.append(Resized_Image)
-            h5LabelList.append(Resized_Gaussian_Image)
+            h5LabelList.append(Resized_GT_Image)
             
         except :
             print('f')
             pass
 
-    X_Train = np.array(imgLabelList,dtype="float32")
-    Y_Train = np.array(h5LabelList,dtype="float32")
-    X_Train = X_Train / 255.0
-    Y_Train = np.expand_dims(Y_Train, axis=-1)
+    X_Arr = np.array(imgLabelList,dtype="float32")
+    Y_Arr = np.array(h5LabelList,dtype="float32")
+    X_Arr = X_Arr / 255.0
+    Y_Arr = np.expand_dims(Y_Arr, axis=-1)
 
-    return X_Train, Y_Train
+    return X_Arr, Y_Arr
 
 # Custom dataset class
 class CustomDataset(Dataset):

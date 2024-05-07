@@ -1,5 +1,5 @@
 from sklearn.model_selection import train_test_split
-from CNNunet import UNet
+from UNet import UNet
 from dataset import getImgH5, CustomDataset
 import numpy as np
 import torch
