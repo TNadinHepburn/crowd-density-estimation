@@ -9,18 +9,21 @@ import datetime
 
 def predict_img(net,
                 x_test,
-                device,
-                scale_factor=1):
+                device):
+    
     net.eval()
     img = x_test
+    # img = img.to(device=device, dtype=torch.float32)
     img = img.unsqueeze(0)
-    img = img.to(device=device, dtype=torch.float32)
-
     with torch.no_grad():
-        output = net(img).cpu()
-        output = F.interpolate(output, (x_test.size[1], x_test.size[0]), mode='bilinear')
-        
-    return output[0].long().squeeze().numpy()
+        img = img.to(device)
+        output = net(img)
+        # output = F.interpolate(output, (x_test.size[2], x_test.size[3]), mode='bilinear')
+        output_heatmap = output.cpu().detach().numpy().squeeze()
+        output_heatmap = output_heatmap
+
+    print( 'returning heatmap')
+    return output_heatmap
 
 if __name__ == '__main__':
     img, labels = getImgH5()

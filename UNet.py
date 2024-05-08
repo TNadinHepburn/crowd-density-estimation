@@ -65,9 +65,6 @@ class Up(nn.Module):
 
         x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2,
                         diffY // 2, diffY - diffY // 2])
-        # if you have padding issues, see
-        # https://github.com/HaiyongJiang/U-Net-Pytorch-Unstructured-Buggy/commit/0e854509c2cea854e247a9c615f175f76fbb2e3a
-        # https://github.com/xiaopeng-liao/Pytorch-UNet/commit/8ebac70e633bac59fc22bb5195e513d5832fb3bd
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
 
@@ -147,8 +144,8 @@ if __name__ == '__main__':
     epochs = 100
     dir_checkpoint = Path('./checkpoints/')
 
-    criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-7, weight_decay=1e-8)
+    criterion = nn.L1Loss()
+    optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-8)
 
     for epoch in range(1, epochs + 1):
         model.train()

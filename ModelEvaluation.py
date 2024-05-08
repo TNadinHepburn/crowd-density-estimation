@@ -6,7 +6,7 @@ import torch.nn as nn
 def evaluate(model, val_data):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model.eval()
-    criterion = nn.MSELoss()
+    criterion = nn.L1Loss()
     num_val_batches = len(val_data)
     mse_score = 0.0
     with torch.no_grad():

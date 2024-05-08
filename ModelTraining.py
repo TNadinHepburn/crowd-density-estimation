@@ -9,7 +9,7 @@ def train_model(model, epochs, train_dataset, val_dataset, device, n_train):
     epoch_val_scores = []
 
     criterion = nn.MSELoss()
-    optimizer = optim.Adam(model.parameters(), lr=1e-7, weight_decay=1e-8)
+    optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-8)
 
     for epoch in range(1, epochs + 1):
         model.train()

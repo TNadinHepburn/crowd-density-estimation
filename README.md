@@ -3,6 +3,8 @@ Disseratation Title: Comparative study for calculating crowd densities in static
 By Thomas Nadin-Hepburn  
 University Of Lincoln
 
+[GitHub](https://github.com/TNadinHepburn/crowd-density-estimation)
+
 To run the program ``py crowd-density.py [parameters]``
 
 Parameters avaliable are:  

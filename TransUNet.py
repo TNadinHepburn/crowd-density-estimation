@@ -20,7 +20,7 @@ class TransUNetSeg:
                                patch_dim=cfg.transunet.patch_dim,
                                class_num=cfg.transunet.class_num).to(self.device)
 
-        self.criterion = nn.MSELoss()
+        self.criterion = nn.L1Loss()
         self.optimizer = SGD(self.model.parameters(), lr=cfg.learning_rate,
                              momentum=cfg.momentum, weight_decay=cfg.weight_decay)
 
